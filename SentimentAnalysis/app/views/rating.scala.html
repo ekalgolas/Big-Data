@@ -1,0 +1,33 @@
+@(message: String, movie: String, users: List[Users]) @import helper._ 
+
+@main("Rating") {
+	<h3>@message</h3>
+	<br>
+	<p>If this rating does not seem authentic, please provide a rating and comment to improve our system.</p>
+	@form(routes.Confirm.index()) {
+	<div class="row-fluid">
+		<div class="span6">
+			<div class="form-group">
+				<label for="user">User: </label> <select id="user" name="user"
+					class="form-control"> @for(user <- users) {
+					<option value="@user.user_id">@user.user_id</option> }
+				</select>
+			</div>
+			<div class="form-group">
+				<label for="rating">Rating: </label> 
+				<input type="number" name="rating" min="-10" max="10" required class="form-control">
+			</div>
+			<div class="form-group">
+				<label for="comment">Comment: </label> 
+				<input type="text" name="comment" class="form-control" required>
+			</div>
+			<br>
+			<input type="hidden" name="movie" value="@movie">
+			<div class="form-actions">
+				<button id="get-feedback" type="submit" class="btn btn-primary">Submit
+					Feedback</button>
+				<a href=@routes.Application.index() class="btn">Go to Home Page</a>
+			</div>
+		</div>
+	</div>
+} }

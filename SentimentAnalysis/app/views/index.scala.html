@@ -1,0 +1,23 @@
+@(movies: List[String]) @import helper._ 
+
+@main("Sentiment Analysis") {
+	<h3>Select a movie and click Submit to get its rating</h3>
+	<br>
+	@form(routes.Rating.index()) {
+	<div class="row-fluid">
+		<div class="span6">
+			<div class="form-group">
+				<label for="movie">Movie: </label> <select id="movie" name="movie"
+					class="form-control"> @for(movie <- movies) {
+					<option value="@movie">@movie</option> }
+				</select>
+			</div>
+			<br>
+			<div class="form-actions">
+				<button id="get-movie" type="submit" class="btn btn-primary">Get
+					Rating</button>
+				<a href=@routes.Application.index() class="btn">Cancel</a>
+			</div>
+		</div>
+	</div>
+} }
