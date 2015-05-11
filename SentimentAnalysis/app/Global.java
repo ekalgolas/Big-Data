@@ -32,10 +32,10 @@ public class Global extends GlobalSettings {
 					"dataset/bag.txt"))) {
 				String line = br.readLine();
 				while (line != null) {
-					// System.out.println(line);
 					String[] params = line.split("\t");
 					Rating.logisticRegression.weights.put(params[0],
 							Double.parseDouble(params[1]));
+
 					line = br.readLine();
 				}
 			} catch (Exception IOException) {
@@ -52,23 +52,24 @@ public class Global extends GlobalSettings {
 
 				Rating.logisticRegression.train(pos, neg, 0.1, 50, 0.001);
 
-				// train_folder =
-				// "D:\\UTD\\Class notes\\Big Data\\Assignment\\project\\aclImdb\\test";
-				// neg = Parser.parseFolder(train_folder + "\\neg");
-				// pos = Parser.parseFolder(train_folder + "\\pos");
+				train_folder = "D:\\UTD\\Class notes\\Big Data\\Assignment\\project\\aclImdb\\test";
+				neg = Parser.parseFolder(train_folder + "\\neg");
+				pos = Parser.parseFolder(train_folder + "\\pos");
 
-				// Rating.logisticRegression.train(pos, neg, 0.1, 100, 0.001);
+				Rating.logisticRegression.train(pos, neg, 0.1, 100, 0.001);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
 
-		try (BufferedWriter br = new BufferedWriter(new FileWriter(f.getPath()))) {
-			for (String word : Rating.logisticRegression.weights.keySet())
-				br.write(word + "\t"
-						+ Rating.logisticRegression.weights.get(word) + "\n");
-		} catch (IOException e) {
-			e.printStackTrace();
+			try (BufferedWriter br = new BufferedWriter(new FileWriter(
+					f.getPath()))) {
+				for (String word : Rating.logisticRegression.weights.keySet())
+					br.write(word + "\t"
+							+ Rating.logisticRegression.weights.get(word)
+							+ "\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		Logger.info("System trained!!!.....");

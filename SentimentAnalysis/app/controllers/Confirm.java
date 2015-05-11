@@ -1,11 +1,14 @@
 package controllers;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
+import models.Movies;
 import play.Logger;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
+import util.Rating;
 import views.html.confirm;
 
 /**
@@ -33,6 +36,8 @@ public class Confirm extends Controller {
 		 */
 		public int rating;
 
+		public double twitterRating;
+
 		/**
 		 * Comment given with the rating
 		 */
@@ -42,6 +47,8 @@ public class Confirm extends Controller {
 		 * Movie name
 		 */
 		public String movie;
+
+		public int user;
 	}
 
 	/**
@@ -49,13 +56,22 @@ public class Confirm extends Controller {
 	 * 
 	 * @return Confirmation page
 	 * @throws IOException
+	 * @throws SQLException
 	 */
-	public static Result index() throws IOException {
+	public static Result index() throws IOException, SQLException {
 		// Initialize variables
 		Form<Feedback> form = feedbackForm.bindFromRequest();
 		Logger.info("Getting feedback for movie " + form.get().movie + "....");
 		double rating = form.get().rating;
-		String comment = form.get().comment;
+		int user = form.get().user;
+		double twitter = form.get().twitterRating;
+		int movie = Movies.find.where()
+				.contains("movie_name", form.get().movie).findUnique().movie_id;
+
+		Rating rate = new Rating();
+		rate.insertRatingsRecord(user, movie, rating, twitter);
+		rate.updateUserWeight(user);
+		rate.updateMovieRating(movie);
 
 		// Render result to home page
 		return ok(confirm.render());

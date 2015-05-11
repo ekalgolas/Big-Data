@@ -67,16 +67,29 @@ public class LogisticRegression {
 			HashMap<String, Double> map, double initial) {
 		// Get sum of weights
 		double total = initial;
-		for (String feature : features)
+		for (String feature : features) {
 			total += map.containsKey(feature) ? map.get(feature) : 0.0;
+
+			if (total > 709.0)
+				return 1.0;
+			else if (total < -700.0)
+				return -1.0;
+			else if (Double.isNaN(total))
+				return 0.0;
+		}
 
 		// If total is too big for exp function
 		if (total > 709.0)
 			return 1.0;
-		else
+		else if (total < -700.0)
+			return -1.0;
+		else if (Double.isNaN(total))
+			return 0.0;
+		else {
 			// Else return the value computed from the equation
 			return (Math.exp(total + W0 - initial) / (1.0 + Math.exp(total + W0
 					- initial)));
+		}
 	}
 
 	/**
@@ -117,8 +130,12 @@ public class LogisticRegression {
 				double Y = getY(features, weights, 0.0);
 
 				// Update gradient
-				for (String feature : features)
+				for (String feature : features) {
+					if (Double.isNaN(gradient.get(feature) + 1 - Y))
+						break;
+
 					gradient.put(feature, gradient.get(feature) + 1 - Y);
+				}
 			}
 
 			// Process features in ham
@@ -127,59 +144,26 @@ public class LogisticRegression {
 				double Y = getY(features, weights, 0.0);
 
 				// Update gradient
-				for (String feature : features)
+				for (String feature : features) {
+					if (Double.isNaN(gradient.get(feature) - Y))
+						break;
+
 					gradient.put(feature, gradient.get(feature) - Y);
+				}
 			}
 
 			// Update weights
 			for (String word : gradient.keySet()) {
 				double weight = weights.get(word) + eta
 						* (gradient.get(word) - (lambda * weights.get(word)));
-				if (weight > Integer.MAX_VALUE)
-					weights.put(word, (double) Integer.MAX_VALUE);
-				else if (weight < Integer.MIN_VALUE)
-					weights.put(word, (double) Integer.MIN_VALUE);
-				else
-					weights.put(word, weight);
+
+				if (Double.isNaN(weight)) {
+					Logger.info(weights.get(word) + " " + gradient.get(word));
+					return;
+				}
+
+				weights.put(word, weight);
 			}
 		}
-	}
-
-	/**
-	 * Calculates the accuracy of a classifier
-	 * 
-	 * @param test_ham
-	 *            Test ham data
-	 * @param test_spam
-	 *            Test spam data
-	 * @return Accuracy as a percentage
-	 */
-	public double getAccuracy(ArrayList<ArrayList<String>> test_ham,
-			ArrayList<ArrayList<String>> test_spam) {
-		// Initialize accuracy
-		double accuracy = 0.0;
-
-		// Process test ham data
-		for (ArrayList<String> features : test_ham) {
-			// Get probability of spam
-			double prob = getY(features, weights, W0);
-
-			// If probability is less than 0.5, classification is correct
-			if (prob < 0.5)
-				accuracy++;
-		}
-
-		// Process test spam data
-		for (ArrayList<String> features : test_spam) {
-			// Get probability of spam
-			double prob = getY(features, weights, W0);
-
-			// If probability is greater than 0.5, classification is correct
-			if (prob > 0.5)
-				accuracy++;
-		}
-
-		// Return the accuracy
-		return (accuracy * 100) / (test_ham.size() + test_spam.size());
 	}
 }

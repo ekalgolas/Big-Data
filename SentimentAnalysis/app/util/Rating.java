@@ -6,8 +6,10 @@ import java.sql.*;
 import play.Logger;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.SqlRow;
 
 import machineLearning.LogisticRegression;
+import models.Movies;
 import models.Ratings;
 
 public class Rating {
@@ -20,10 +22,12 @@ public class Rating {
 
 	public double twitterRating(List<String> tweets) {
 		TweetScore tweetscore = new TweetScore();
-		for (String tweet : tweets)
+		for (String tweet : tweets) {
 			tweetscore.add(getScore(tweet));
+			Logger.info(getScore(tweet) + "");
+		}
 
-		return tweetscore.AverageRating();
+		return tweetscore.AverageRating() * 10;
 	}
 
 	public double getScore(String tweet) {
@@ -32,11 +36,9 @@ public class Rating {
 		for (String word : words) {
 			if (logisticRegression.weights.containsKey(word))
 				tweet_score += logisticRegression.weights.get(word);
-
-			Logger.info(tweet_score + "");
 		}
 
-		return tweet_score * 10;
+		return tweet_score;
 	}
 
 	public void insertRatingsRecord(int uid, int mid, double userrating,
@@ -60,40 +62,47 @@ public class Rating {
 	}
 
 	public void updateUserWeight(int uid) throws SQLException {
-		String sql = "select * from ratings where user_id =" + uid;
-		ResultSet rs = dbinstance.executeQuery(sql);
+		List<Ratings> ratings = Ratings.find.where().eq("user_id", uid)
+				.findList();
+
 		double average = 0.0;
 		int count = 0;
-		while (rs.next()) {
-			// System.out.println(rs.getDouble(3));
-			average = average + rs.getDouble(4);
+		for (Ratings r : ratings) {
+			average = average + r.similarity;
 			count++;
 		}
+
 		average = average / count;
-		sql = "update users set user_weight = " + average + " where user_id ="
-				+ uid;
-		dbinstance.updateQuery(sql);
-		System.out.println("User weight updated!!");
+		Logger.info(average + "");
+		models.Users user = (models.Users) Ebean.find(models.Users.class, uid);
+		user.user_weight = average;
+		Ebean.save(user);
+
+		Logger.info("User weight updated for user " + uid + " as " + average
+				+ "....");
 	}
 
 	public void updateMovieRating(int mid) throws SQLException {
-		String sql = "select * from ratings join users on ratings.user_id = users.user_id and ratings.movie_id="
+		String sql = "select user_weight, rating from ratings join users on ratings.user_id = users.user_id and ratings.movie_id="
 				+ mid;
-		ResultSet rs = dbinstance.executeQuery(sql);
+		List<SqlRow> results = Ebean.createSqlQuery(sql).findList();
 		double weightedsum = 0.0;
 		double weights = 0.0;
 		double weightedavg = 0.0;
-		while (rs.next()) {
-			double weight = rs.getDouble(6);
+		for (SqlRow row : results) {
+			double weight = row.getDouble("user_weight");
 			weights = weights + weight;
-			double ratings = rs.getDouble(3);
+			double ratings = row.getDouble("rating");
 			weightedsum = weightedsum + (weight * ratings);
 		}
+
 		if (weights != 0)
 			weightedavg = weightedsum / weights;
-		String sql2 = "update movies set rating = " + weightedavg
-				+ " where movie_id = " + mid;
-		dbinstance.updateQuery(sql2);
+
+		Movies movie = (Movies) Ebean.find(Movies.class, mid);
+		movie.rating = weightedavg;
+		Ebean.save(movie);
+		Logger.info("Movie " + mid + " updated!!....");
 	}
 
 	public double getMovieRating(int mid) throws SQLException {

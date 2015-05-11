@@ -1,4 +1,4 @@
-@(message: String, movie: String, users: List[Users]) @import helper._ 
+@(message: String, movie: String, users: List[Users], twitterRating: Double) @import helper._ 
 
 @main("Rating") {
 	<h3>@message</h3>
@@ -23,6 +23,7 @@
 			</div>
 			<br>
 			<input type="hidden" name="movie" value="@movie">
+			<input type="hidden" name="twitterRating" value="@twitterRating">
 			<div class="form-actions">
 				<button id="get-feedback" type="submit" class="btn btn-primary">Submit
 					Feedback</button>

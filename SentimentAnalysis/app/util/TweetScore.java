@@ -32,7 +32,9 @@ public class TweetScore {
 	}
 
 	public void add(double score) {
-		// TODO Auto-generated method stub
+		if (score == 0.0)
+			return;
+
 		if (score > max)
 			max = score;
 		if (score < min)
@@ -43,7 +45,6 @@ public class TweetScore {
 	}
 
 	public double AverageRating() {
-		// TODO Auto-generated method stub
 		return ((avg - min) / (max - min));
 	}
 

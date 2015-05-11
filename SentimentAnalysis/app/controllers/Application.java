@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.Movies;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
@@ -32,7 +33,10 @@ public class Application extends Controller {
 		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			String line = br.readLine();
 			while (line != null) {
-				movies.add(line.split("-")[0]);
+				Movies movie = (Movies) Movies.find.where()
+						.contains("movie_name", line.split("-")[0])
+						.findUnique();
+				movies.add(movie.movie_name + " : " + movie.rating);
 				line = br.readLine();
 			}
 		}
