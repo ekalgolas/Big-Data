@@ -50,13 +50,13 @@ public class Global extends GlobalSettings {
 				ArrayList<ArrayList<String>> pos = Parser
 						.parseFolder(train_folder + "\\pos");
 
-				Rating.logisticRegression.train(pos, neg, 0.1, 50, 0.001);
+				Rating.logisticRegression.train(pos, neg, 2.0, 100, 0.001);
 
 				train_folder = "D:\\UTD\\Class notes\\Big Data\\Assignment\\project\\aclImdb\\test";
 				neg = Parser.parseFolder(train_folder + "\\neg");
 				pos = Parser.parseFolder(train_folder + "\\pos");
 
-				Rating.logisticRegression.train(pos, neg, 0.1, 100, 0.001);
+				Rating.logisticRegression.train(pos, neg, 2.0, 100, 0.001);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

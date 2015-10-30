@@ -63,8 +63,8 @@ public class Rating extends Controller {
 		double twitterScore = rate.twitterRating(tweets);
 
 		if (!Double.isNaN(twitterScore))
-			result = "The rating for movie " + form.get().movie + " is "
-					+ twitterScore;
+			result = "The rating for movie " + form.get().movie.split(":")[0]
+					+ " is " + twitterScore;
 		else
 			result = "No data available, please wait for the data from live stream";
 
